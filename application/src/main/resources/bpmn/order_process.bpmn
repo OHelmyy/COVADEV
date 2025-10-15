@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  targetNamespace="http://example.com/orderprocess">
+  <bpmn:process id="Order_Process" name="Order Process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Start Order"/>
+    <bpmn:task id="Task_ApproveOrder" name="Approve Order"/>
+    <bpmn:task id="Task_ShipOrder" name="Ship Order"/>
+    <bpmn:endEvent id="EndEvent_1" name="Order Completed"/>
+  </bpmn:process>
+</bpmn:definitions>
