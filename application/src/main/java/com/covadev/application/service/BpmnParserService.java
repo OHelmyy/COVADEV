@@ -23,14 +23,34 @@ public class BpmnParserService {
         BpmnModelInstance modelInstance = Bpmn.readModelFromFile(file);
         Collection<Process> processes = modelInstance.getModelElementsByType(Process.class);
 
-        List<String> processNames = new ArrayList<>();
+        List<String> processDetails = new ArrayList<>();
+
         for (Process process : processes) {
-            String name = process.getName();
-            if (name != null && !name.isEmpty()) {
-                processRepository.save(new ProcessEntity(null, name));
-                processNames.add(name);
+            StringBuilder sb = new StringBuilder();
+            String processName = process.getName() != null ? process.getName() : process.getId();
+            sb.append("Process: ").append(processName);
+
+            // Save process in DB
+            processRepository.save(new ProcessEntity(null, processName));
+
+            // Get all flow elements (tasks, events, etc.)
+            Collection<org.camunda.bpm.model.bpmn.instance.FlowElement> elements = process.getFlowElements();
+
+            for (org.camunda.bpm.model.bpmn.instance.FlowElement element : elements) {
+                // Skip sequenceFlow elements
+                if (element instanceof org.camunda.bpm.model.bpmn.instance.SequenceFlow) {
+                    continue;
+                }
+
+                String elementType = element.getElementType().getTypeName();
+                String elementName = element.getName() != null ? element.getName() : element.getId();
+
+                sb.append("\n  - ").append(elementType).append(": ").append(elementName);
             }
+
+            processDetails.add(sb.toString());
         }
-        return processNames;
+
+        return processDetails;
     }
 }
