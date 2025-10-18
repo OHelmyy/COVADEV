@@ -1,9 +1,8 @@
 package com.covadev.application.controller;
 
-
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,13 +23,13 @@ public class BpmnController {
     private BpmnParserService parserService;
 
     @PostMapping("/upload")
-    public List<String> uploadBpmnFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public Map<String, Object> uploadBpmnFile(@RequestParam("file") MultipartFile file) throws IOException {
         File tempFile = File.createTempFile("uploaded-", ".bpmn");
         file.transferTo(tempFile);
 
-        List<String> processNames = parserService.parseProcesses(tempFile);
-        tempFile.delete();
+        Map<String, Object> response = parserService.parseProcessesWithSummary(tempFile);
 
-        return processNames;
+        tempFile.delete();
+        return response;
     }
 }
