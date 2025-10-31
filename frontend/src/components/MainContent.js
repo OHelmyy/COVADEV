@@ -10,6 +10,8 @@ function MainContent() {
   const [aiSummary, setAiSummary] = useState("");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const [recommendations, setRecommendations] = useState("");
+
 
 
   const handleFileSelect = (file) => {
@@ -76,6 +78,11 @@ function MainContent() {
       );
 
       const data = response.data;
+
+      if (data.recommendations) {
+        setRecommendations(data.recommendations);
+      }
+      
 
       if (data && data.processes && Array.isArray(data.processes)) {
         setOutput(`✅ Parsed Processes:\n${data.processes.join("\n")}`);
@@ -187,6 +194,15 @@ function MainContent() {
             </div>
           </div>
         )}
+        {recommendations && (
+        <div className="output-section">
+          <h2 className="output-title">Recommended Methods</h2>
+          <div className="output-content">
+            <pre className="output-text">{recommendations}</pre>
+          </div>
+        </div>
+      )}
+
       </div>
     </main>
   );
