@@ -78,5 +78,27 @@ public Map<String, Object> parseProcessesWithSummary(File file) {
         result.put("description", summary);
         return result;
     }
+
+    public Map<String, Object> parseProcessesWithRecommendations(File file) {
+    List<String> processes = parseProcesses(file);
+    String allProcessesText = String.join("\n", processes);
+
+    // Prompt to guide the AI to generate method recommendations
+    String prompt = "You are a BPMN process analysis assistant. Based on the following BPMN processes, "
+        + "generate a list of 3–5 recommended methods, actions, or improvements for implementing or optimizing this workflow. "
+        + "Each recommendation should be concise (1–2 sentences) and actionable for a software developer or process analyst.\n\n"
+        + "BPMN Processes:\n"
+        + allProcessesText;
+
+    // Use your Local LLM to get recommendations
+    String recommendationsText = llmService.generateSummary(prompt);
+
+    Map<String, Object> result = new HashMap<>();
+    result.put("processes", processes);
+    result.put("recommendations", recommendationsText);
+    return result;
+}
+
+
 }
 
