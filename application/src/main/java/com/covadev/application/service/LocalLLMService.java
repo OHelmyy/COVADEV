@@ -59,6 +59,8 @@ public class LocalLLMService {
                     .replace("\\n", "\n")
                     .trim();
 
+            cleaned = cleaned.replaceFirst("^.*\\r?\\n", "").trim();
+
             return cleaned.isEmpty() ? " No summary generated." : cleaned;
 
         } catch (Exception e) {

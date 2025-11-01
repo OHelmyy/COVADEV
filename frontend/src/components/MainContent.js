@@ -11,8 +11,10 @@ function MainContent() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
   const [recommendations, setRecommendations] = useState("");
-
-
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [summaryProgress, setSummaryProgress] = useState(0);
+  const [recommendationProgress, setRecommendationProgress] = useState(0);
 
   const handleFileSelect = (file) => {
     if (file && (file.name.endsWith(".bpmn") || file.name.endsWith(".java"))) {
@@ -23,6 +25,7 @@ function MainContent() {
         )} KB\nType: ${file.type || "Unknown"}\n\nReady to upload...`
       );
       setAiSummary("");
+      setRecommendations("");
     } else {
       alert("Please select a .bpmn or .java file");
     }
@@ -67,9 +70,10 @@ function MainContent() {
     try {
       setUploading(true);
       setOutput(`Uploading "${selectedFile.name}" to backend...`);
-      setAiSummary("Generating AI summary...");
+      setAiSummary("");
+      setRecommendations("");
 
-      const response = await axios.post(
+      const uploadRes = await axios.post(
         "http://localhost:8081/api/bpmn/upload",
         formData,
         {
@@ -77,32 +81,57 @@ function MainContent() {
         }
       );
 
-      const data = response.data;
+      // 🆕 Expect only parsed processes (List<String>)
+      const parsedProcesses = uploadRes.data;
+      const processText = Array.isArray(parsedProcesses)
+        ? uploadRes.data.join("\n")
+        : JSON.stringify(uploadRes.data, null, 2);
 
-      if (data.recommendations) {
-        setRecommendations(data.recommendations);
-      }
-      
+      setOutput(`✅ File parsed successfully:\n\n${parsedProcesses}`);
 
-      if (data && data.processes && Array.isArray(data.processes)) {
-        setOutput(`✅ Parsed Processes:\n${data.processes.join("\n")}`);
-        setAiSummary(data.description || "No AI summary received.");
-      } else {
-      // Response from Spring Boot (List<String> or message)
-      const result = Array.isArray(response.data)
-        ? response.data.join("\n")
-        : JSON.stringify(response.data, null, 2);
+      // STEP 2️⃣ — AI Summary
+      setLoadingSummary(true);
+      setSummaryProgress(0);
+      const summaryInterval = setInterval(() => {
+        setSummaryProgress((prev) => (prev < 90 ? prev + 5 : prev));
+      }, 300); // increase 5% every 300ms
 
-      
+      const descRes = await axios.post(
+        "http://localhost:8081/api/description/generate",
+        { text: processText }
+      );
+      clearInterval(summaryInterval);
+      setSummaryProgress(100);
 
-      setOutput(`✅ Upload complete!\n\nParsed Processes:\n${result}`);
-      setAiSummary( "No AI summary found.");
-      }
+      setAiSummary(descRes.data.description || "No AI summary received.");
+      setLoadingSummary(false);
 
+      // STEP 3️⃣ — Recommendations
+      setLoadingRecommendations(true);
+      setRecommendationProgress(0);
+
+      const recInterval = setInterval(() => {
+        setRecommendationProgress((prev) => (prev < 90 ? prev + 5 : prev));
+      }, 300);
+
+      const recRes = await axios.post(
+        "http://localhost:8081/api/recommendations/generate",
+        { text: processText }
+      );
+      clearInterval(recInterval);
+      setRecommendationProgress(100);
+
+      setRecommendations(
+        recRes.data.recommendations || "No recommendations received."
+      );
+      setLoadingRecommendations(false);
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("Error during upload process:", error);
       setOutput(`❌ Upload failed: ${error.message}`);
       setAiSummary("");
+      setRecommendations("");
+      setLoadingSummary(false);
+      setLoadingRecommendations(false);
     } finally {
       setUploading(false);
     }
@@ -186,7 +215,19 @@ function MainContent() {
             </div>
           </div>
         )}
-        {aiSummary && (
+        {loadingSummary && (
+          <div className="output-section">
+            <h2 className="output-title">AI Summary</h2>
+            <div className="loading-bar">
+              <div
+                className="loading-progress"
+                style={{ width: `${summaryProgress}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+
+        {!loadingSummary && aiSummary && (
           <div className="output-section">
             <h2 className="output-title">AI Summary</h2>
             <div className="output-content">
@@ -194,15 +235,26 @@ function MainContent() {
             </div>
           </div>
         )}
-        {recommendations && (
-        <div className="output-section">
-          <h2 className="output-title">Recommended Methods</h2>
-          <div className="output-content">
-            <pre className="output-text">{recommendations}</pre>
+        {loadingRecommendations && (
+          <div className="output-section">
+            <h2 className="output-title">Recommended Methods</h2>
+            <div className="loading-bar">
+              <div
+                className="loading-progress"
+                style={{ width: `${recommendationProgress}%` }}
+              ></div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
+        {!loadingRecommendations && recommendations && (
+          <div className="output-section">
+            <h2 className="output-title">Recommended Methods</h2>
+            <div className="output-content">
+              <pre className="output-text">{recommendations}</pre>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

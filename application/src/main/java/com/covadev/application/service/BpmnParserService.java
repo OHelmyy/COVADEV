@@ -3,9 +3,7 @@ package com.covadev.application.service;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.camunda.bpm.model.bpmn.Bpmn;
 import org.camunda.bpm.model.bpmn.BpmnModelInstance;
@@ -60,45 +58,4 @@ public class BpmnParserService {
         return processDetails;
     }
 
-public Map<String, Object> parseProcessesWithSummary(File file) {
-        List<String> processes = parseProcesses(file);
-        String allProcessesText = String.join("\n", processes);
-
-        String prompt = "Summarize the following BPMN process in 2 to 3 sentences. "
-        + "Explain what the process does, its main goal, and the general flow. "
-        + "Keep it short and clear for a business reader.\n\n"
-        + "BPMN Process:\n"
-        + allProcessesText;
-
-    // Call AI summary builder from LocalLLMService
-        String summary = llmService.generateSummary(prompt);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("processes", processes);
-        result.put("description", summary);
-        return result;
-    }
-
-    public Map<String, Object> parseProcessesWithRecommendations(File file) {
-    List<String> processes = parseProcesses(file);
-    String allProcessesText = String.join("\n", processes);
-
-    // Prompt to guide the AI to generate method recommendations
-    String prompt = "You are a BPMN process analysis assistant. Based on the following BPMN processes, "
-        + "generate a list of 3–5 recommended methods, actions, or improvements for implementing or optimizing this workflow. "
-        + "Each recommendation should be concise (1–2 sentences) and actionable for a software developer or process analyst.\n\n"
-        + "BPMN Processes:\n"
-        + allProcessesText;
-
-    // Use your Local LLM to get recommendations
-    String recommendationsText = llmService.generateSummary(prompt);
-
-    Map<String, Object> result = new HashMap<>();
-    result.put("processes", processes);
-    result.put("recommendations", recommendationsText);
-    return result;
 }
-
-
-}
-
