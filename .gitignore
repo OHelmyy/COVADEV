@@ -1,3 +1,9 @@
+# Python virtual envs
+venv/
+.venv/
+*/venv/
+*/.venv/
+
 # Node
 node_modules/
 frontend/node_modules/
@@ -12,3 +18,20 @@ __pycache__/
 *.pyc
 .env
 .env.local
+Django/bpmn_parser/__pycache__/__init__.cpython-314.pyc
+Django/bpmn_parser/__pycache__/admin.cpython-314.pyc
+Django/bpmn_parser/__pycache__/ai_utils.cpython-314.pyc
+Django/bpmn_parser/__pycache__/apps.cpython-314.pyc
+Django/bpmn_parser/__pycache__/models.cpython-314.pyc
+Django/bpmn_parser/__pycache__/parser.cpython-314.pyc
+Django/bpmn_parser/__pycache__/urls.cpython-314.pyc
+Django/bpmn_parser/__pycache__/views.cpython-314.pyc
+Django/core/__pycache__/__init__.cpython-314.pyc
+Django/core/__pycache__/settings.cpython-314.pyc
+Django/core/__pycache__/urls.cpython-314.pyc
+Django/myapp/__pycache__/__init__.cpython-314.pyc
+Django/myapp/__pycache__/admin.cpython-314.pyc
+Django/myapp/__pycache__/apps.cpython-314.pyc
+Django/myapp/__pycache__/models.cpython-314.pyc
+Django/myapp/__pycache__/urls.cpython-314.pyc
+Django/myapp/__pycache__/views.cpython-314.pyc
